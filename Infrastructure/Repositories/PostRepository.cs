@@ -33,9 +33,14 @@ namespace Infrastructure.Repositories
             await Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<Post>> GetAllAsync()
+        public async Task<IEnumerable<Post>> GetAllAsync(int pageNumber, int pageSize)
         {
-            return await _context.Posts.ToListAsync();
+            return await _context.Posts.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        }
+
+        public async Task<int> GetAllCountAsync()
+        {
+            return await _context.Posts.CountAsync();
         }
 
         public async Task<Post> GetByIdAsync(int id)

@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAPI.Filters;
+using WebAPI.Helpers;
 using WebAPI.Wrappers;
 
 namespace WebAPI.Controllers.V1
@@ -27,10 +29,14 @@ namespace WebAPI.Controllers.V1
 
         [SwaggerOperation(Summary = "Retrieves all posts")]
         [HttpGet]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync([FromQuery]PaginationFilter paginationFilter)
         {
-            var posts = await _postService.GetAllPostsAsync();
-            return Ok(new Response<IEnumerable<PostDto>>(posts));
+            var validPaginationFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize);
+
+            var posts = await _postService.GetAllPostsAsync(validPaginationFilter.PageNumber, validPaginationFilter.PageSize);
+            var totalRecords = await _postService.GetAllPostsCountAsync();
+
+            return Ok(PaginationHelper.CreatePagedResponse(posts, validPaginationFilter, totalRecords));
         }
 
         [SwaggerOperation(Summary = "Retrieves a specific post by unique id")]
